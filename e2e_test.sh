@@ -1,4 +1,4 @@
-
+#!/bin/bash
 # exit when any command fails
 
 SUCCESS="\033[0;32m"
