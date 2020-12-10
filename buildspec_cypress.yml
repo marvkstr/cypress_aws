@@ -1,0 +1,29 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_REGION: eu-west-1
+    AWS_ACCOUNT_ID: 761841363414
+    CYPRESS_REPO: aws_cypress
+    IMAGE_TAG: latest
+
+phases:
+  install:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+  pre_build:
+    commands:
+      - echo Running e2e-Tests
+      - sh './e2e_test.sh'
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Cypress image...
+      - docker build -f cypress.dk -t $CYPRESS_REPO:$IMAGE_TAG .
+      - docker tag $CYPRESS_REPO:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$CYPRESS_REPO:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Cypress image...
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$CYPRESS_REPO:$IMAGE_TAG

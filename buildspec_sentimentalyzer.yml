@@ -1,0 +1,30 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_REGION: eu-west-1
+    AWS_ACCOUNT_ID: 761841363414
+    SENTI_REPO: aws_sentimentalyzer
+    IMAGE_TAG: latest
+
+phases:
+  install:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+  pre_build:
+    commands:
+      - echo Running e2e-Tests
+      - sh './e2e_test.sh'
+  build:
+    commands:
+      - echo Build started on `date`
+
+      - echo Building the Sentimentalyzer image...
+      - docker build -f Dockerfile -t $SENTI_REPO:$IMAGE_TAG .
+      - docker tag $SENTI_REPO:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$SENTI_REPO:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Sentimentalyzer image...
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$SENTI_REPO:$IMAGE_TAG
