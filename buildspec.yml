@@ -13,8 +13,8 @@ phases:
   install:
     commands:
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region $AWS_REGION | \
-        docker login --username AWS --password-stdin $BASE_URI
+      - aws ecr get-login-password --region $AWS_REGION | docker login \
+        --username AWS --password-stdin $BASE_URI
   pre_build:
     commands:
       - echo Running e2e-Tests
