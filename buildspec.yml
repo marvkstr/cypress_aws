@@ -4,15 +4,17 @@ env:
   variables:
     AWS_REGION: eu-west-1
     AWS_ACCOUNT_ID: 761841363414
-    CYPRESS_REPO: aws_cypress
-    SENTI_REPO: aws_sentimentalyzer
+    CYPRESS_IMAGE: aws_cypress:latest
+    SENTI_IMAGE: aws_sentimentalyzer:latest
     IMAGE_TAG: latest
+    BASE_URI: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
 phases:
   install:
     commands:
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+      - aws ecr get-login-password --region $AWS_REGION | \
+        docker login --username AWS --password-stdin $BASE_URI
   pre_build:
     commands:
       - echo Running e2e-Tests
@@ -21,15 +23,15 @@ phases:
     commands:
       - echo Build started on `date`
       - echo Building the Cypress image...
-      - docker build -f cypress.dk -t $CYPRESS_REPO:$IMAGE_TAG .
-      - docker tag $CYPRESS_REPO:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$CYPRESS_REPO:$IMAGE_TAG
+      - docker build -f cypress.dk -t $CYPRESS_IMAGE .
+      - docker tag $CYPRESS_IMAGE $BASE_URI/$CYPRESS_IMAGE
       - echo Building the Sentimentalyzer image...
-      - docker build -f Dockerfile -t $SENTI_REPO:$IMAGE_TAG .
-      - docker tag $SENTI_REPO:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$SENTI_REPO:$IMAGE_TAG
+      - docker build -f Dockerfile -t $SENTI_IMAGE .
+      - docker tag $SENTI_IMAGE $BASE_URI/$SENTI_IMAGE
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Cypress image...
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$CYPRESS_REPO:$IMAGE_TAG
+      - docker push $BASE_URI/$CYPRESS_IMAGE
       - echo Pushing the Sentimentalyzer image...
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$SENTI_REPO:$IMAGE_TAG
+      - docker push $BASE_URI/$SENTI_IMAGE
