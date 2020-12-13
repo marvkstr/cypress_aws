@@ -3,11 +3,10 @@ version: 0.2
 env:
   variables:
     AWS_REGION: eu-west-1
-    AWS_ACCOUNT_ID: 761841363414
     CYPRESS_IMAGE: aws_cypress:latest
     SENTI_IMAGE: aws_sentimentalyzer:latest
     IMAGE_TAG: latest
-    BASE_URI: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+    BASE_URI: 761841363414.dkr.ecr.eu-west-1.amazonaws.com
 
 phases:
   install:
